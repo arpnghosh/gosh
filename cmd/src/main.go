@@ -42,15 +42,24 @@ func main() {
 			}
 
 		case "cd":
-			// cd    --> /home/
-			// cd .. --> previous directory
-			// err   --> when cd into a file, show err not a directory
-			dir := strings.Join(args[1:], " ")
-			os.Chdir(dir)
+			if len(args) == 1 {
+				os.Chdir("/home")
+			} else if len(args) == 2 && args[1] == ".." {
+				os.Chdir("..")
+			} else if len(args) > 2 {
+				fmt.Println("cd: too many arguments for the cd command")
+			} else {
+				dir := strings.Join(args[1:], " ")
+				dirInfo, _ := os.Stat(dir)
+				if dirInfo.IsDir() {
+					os.Chdir(dir)
+				} else {
+					fmt.Printf("cd: %s is not a directory\n", dir)
+				}
+			}
 
 		default:
 			fmt.Println("gosh: command not found: " + input)
-
 		}
 	}
 }
