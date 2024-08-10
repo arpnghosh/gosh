@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -35,23 +36,23 @@ func main() {
 		case "pwd":
 			fmt.Println(os.Getwd())
 
-		case "ls":
-			files, _ := os.ReadDir(".")
-			for _, file := range files {
-				fmt.Println(file.Name())
-			}
-
 		case "cd":
 			if len(args) == 1 {
-				os.Chdir("/home")
+				homeDir, err := os.UserHomeDir()
+				if err != nil {
+					fmt.Fprintln(os.Stderr, "Error getting user's home directory", err)
+				}
+				os.Chdir(homeDir)
 			} else if len(args) == 2 && args[1] == ".." {
 				os.Chdir("..")
 			} else if len(args) > 2 {
 				fmt.Println("cd: too many arguments for the cd command")
 			} else {
 				dir := strings.Join(args[1:], " ")
-				dirInfo, _ := os.Stat(dir)
-				if dirInfo.IsDir() {
+				dirInfo, err := os.Stat(dir)
+				if err != nil {
+					fmt.Printf("cd: directory %s does not exist\n", dir)
+				} else if dirInfo.IsDir() {
 					os.Chdir(dir)
 				} else {
 					fmt.Printf("cd: %s is not a directory\n", dir)
@@ -59,7 +60,14 @@ func main() {
 			}
 
 		default:
-			fmt.Println("gosh: command not found: " + input)
+			cmd := exec.Command(command, args[1:]...)
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err := cmd.Run()
+			if err != nil {
+				fmt.Println("gosh: command not found: " + input)
+			}
 		}
 	}
 }
