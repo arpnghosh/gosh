@@ -12,6 +12,8 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
+		fmt.Println(CustomPrompt())
+
 		fmt.Fprint(os.Stdout, "$ ")
 		input, err := reader.ReadString('\n')
 		if err != nil {
@@ -43,8 +45,6 @@ func main() {
 					fmt.Fprintln(os.Stderr, "Error getting user's home directory", err)
 				}
 				os.Chdir(homeDir)
-			} else if len(args) == 2 && args[1] == ".." {
-				os.Chdir("..")
 			} else if len(args) > 2 {
 				fmt.Println("cd: too many arguments for the cd command")
 			} else {
