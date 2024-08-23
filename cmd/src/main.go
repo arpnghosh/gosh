@@ -10,6 +10,7 @@ import (
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)
+	amp := make(map[string]string)
 
 	for {
 		fmt.Println(CustomPrompt())
@@ -59,7 +60,32 @@ func main() {
 				}
 			}
 
+		case "alias": // currently works for only external commands
+
+			if len(args) == 1 {
+				fmt.Println("Usage: alias name = command")
+			} else if len(args) == 2 && args[1] == "list" {
+				if len(amp) == 0 {
+					fmt.Println("No aliases defined")
+				} else {
+					for key, value := range amp {
+						fmt.Printf("Alias: %s Command: %s \n", key, value)
+					}
+				}
+			} else if len(args) >= 4 && args[2] == "=" {
+				alias_name := strings.Join(args[1:2], " ")
+				alias_command := strings.Join(args[3:], " ")
+				amp[alias_name] = alias_command
+				fmt.Printf("Command: %v set to Alias: %v \n", alias_command, alias_name)
+			} else {
+				fmt.Println("Usage: alias name = command")
+			}
+
 		default:
+			if aliasCmd, exists := amp[command]; exists {
+				args = strings.Fields(aliasCmd)
+				command = args[0]
+			}
 			cmd := exec.Command(command, args[1:]...)
 			cmd.Stdin = os.Stdin
 			cmd.Stdout = os.Stdout
