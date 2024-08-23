@@ -81,6 +81,19 @@ func main() {
 				fmt.Println("Usage: alias name = command")
 			}
 
+		case "unalias": // unaliasing support
+			nameOfAlias := strings.Join(args[1:2], " ")
+			if len(args) == 1 {
+				fmt.Println("Usage: unalias name")
+			} else if len(args) >= 3 {
+				fmt.Println("Delete one alias name at a time")
+			} else if _, exists := amp[nameOfAlias]; exists {
+				delete(amp, nameOfAlias)
+				fmt.Printf("Deleted alias: %s \n", nameOfAlias)
+			} else {
+				fmt.Println("Alias does not exist")
+			}
+
 		default:
 			if aliasCmd, exists := amp[command]; exists {
 				args = strings.Fields(aliasCmd)
